@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -24,7 +25,6 @@ public class PlayWithDepartement {
                 c.getCodePostale().startsWith("97") ?
                         c.getCodePostale().substring(0, 3) :
                         c.getCodePostale().substring(0, 2);
-        Function<Commune, String> toNoms= Commune::getName;
 
         final Map<String, List<Commune>> communeByCodeDepartement = communes.stream()
                 .collect(Collectors.groupingBy(communeForCodeDep));
@@ -49,9 +49,12 @@ public class PlayWithDepartement {
         numberCommunesByDep.forEach(
                 (key, value)-> System.out.println(key+" : "+value)
         );
+        //Departement avec le plus de commune
+        final Map.Entry<String, Long> maxCommunes = numberCommunesByDep.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .orElseThrow(() -> new RuntimeException("hash vide!!!"));
 
-        System.out.println(totalCommune+" = "+communes.size());
-
+        System.out.println(maxCommunes.getKey()+" : "+maxCommunes.getValue());
     }
     public static List<Commune> getCommune(Path path) {
         Predicate<String> isComment= l-> l.startsWith("#");
@@ -73,8 +76,8 @@ public class PlayWithDepartement {
     }
     public static List<Departement> getDepartements(Path path) {
         Predicate<String> isComment= l-> l.startsWith("#");
-        Function<String, String> getName= l-> l.substring(0, l.indexOf(" "));
-        Function<String, String> getCodePostale= l-> l.substring(l.indexOf(" ")+3);
+        Function<String, String> getCodePostale= l-> l.substring(0, l.indexOf(" "));
+        Function<String, String> getName= l-> l.substring(l.indexOf(" ")+3);
         Function<String, Departement> mapToDepartement= l-> new Departement(getName.apply(l), getCodePostale.apply(l));
 
         final List<Departement> departements;
